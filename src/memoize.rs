@@ -13,6 +13,14 @@ use crate::tree::{CallTree, InsertError};
 /// The global list of eviction functions.
 static EVICTORS: RwLock<Vec<fn(usize)>> = RwLock::new(Vec::new());
 
+
+pub static HITS: AtomicUsize = AtomicUsize::new(0);
+pub static MISSES: AtomicUsize = AtomicUsize::new(0);
+
+pub fn take_stats() -> (usize, usize) {
+    (HITS.swap(0, Ordering::Relaxed), MISSES.swap(0, Ordering::Relaxed))
+}
+
 /// Executes a function, trying to use a cached result for it.
 #[allow(clippy::type_complexity)]
 pub fn memoize<'a, In, Out, F>(
@@ -60,7 +68,7 @@ where
 
         #[cfg(feature = "testing")]
         crate::testing::register_hit();
-
+        HITS.fetch_add(1, Ordering::Relaxed);
         return entry.output.clone();
     }
 
@@ -87,7 +95,7 @@ where
 
     #[cfg(feature = "testing")]
     crate::testing::register_miss();
-
+    MISSES.fetch_add(1, Ordering::Relaxed);
     output
 }
 

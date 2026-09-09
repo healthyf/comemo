@@ -101,7 +101,7 @@ pub mod testing;
 
 pub use crate::constraint::Constraint;
 pub use crate::hash::Prehashed;
-pub use crate::memoize::evict;
+pub use crate::memoize::{HITS, MISSES, evict, take_stats};
 pub use crate::track::{Track, Tracked, TrackedMut};
 
 #[cfg(feature = "macros")]
